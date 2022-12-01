@@ -1,0 +1,6 @@
+input.txt
+.vscode
+bin
+obj
+
+aoc22.csproj

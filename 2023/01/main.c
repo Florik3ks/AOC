@@ -2,35 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../readinput.h"
 #include "main.h"
 
-enum
+
+int main(int argc, char *argv[])
 {
-    MAXLINES = 5000
-};
-
-int main(void)
-{
-    int lineCount = 0;
-    int i = 0;
-    char *lines[MAXLINES];
-    FILE *fp = fopen("input.txt", "r");
-
-    if (fp == 0)
-    {
-        fprintf(stderr, "failed to open input.txt\n");
-        exit(1);
+    char *lines[5000];
+    int lineCount;
+    if(argc < 2){
+        fprintf(stderr, "no input file\n");
+        exit(0);
     }
-
-    char line[256];
-    while (fgets(line, sizeof(line), fp) != NULL)
-    {
-        lineCount++;
-        lines[i] = malloc(strlen(line));
-        strcpy(lines[i], line);
-        i++;
-    }
-    fclose(fp);
+    printf("%s with %s\n", argv[0], argv[1]);
+    readinput(lines, &lineCount, argv[1]);
 
     printf("task one: %d\n", taskone(lines, lineCount));
     printf("task two: %d\n", tasktwo(lines, lineCount));

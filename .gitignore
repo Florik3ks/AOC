@@ -3,6 +3,9 @@ input.txt
 bin
 obj
 
+
 aoc22.csproj
 aoc.csproj
 *.csproj
+*.out
+*.exe

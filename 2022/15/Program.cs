@@ -12,8 +12,8 @@ namespace AOC22
         {
             String[] input = loadInput();
             Console.WriteLine("15");
-            // Console.WriteLine(part1(input));
-            Console.WriteLine(part2(input));
+            Console.WriteLine(part1(input));
+            // Console.WriteLine(part2(input));
         }
 
         static String[] loadInput()

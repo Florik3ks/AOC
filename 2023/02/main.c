@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../readinput.h"
+#include "../util/readinput.h"
 #include "main.h"
 
 int main(int argc, char *argv[])

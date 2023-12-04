@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../readinput.h"
+#include "../util/readinput.h"
+#include "../util/utility.h"
+
 #include "main.h"
 
 

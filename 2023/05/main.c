@@ -23,11 +23,11 @@ int main(int argc, char *argv[])
     printf("%s with %s\n", argv[0], argv[1]);
     readinput(lines, &lineCount, argv[1]);
 
-    printf("task one: %d\n", taskone(lines, lineCount));
-    printf("task two: %d\n", tasktwo(lines, lineCount));
+    printf("task one: %llu\n", taskone(lines, lineCount));
+    printf("task two: %llu\n", tasktwo(lines, lineCount));
 }
 
-int taskone(char *lines[], int linecount)
+uint64_t taskone(char *lines[], int linecount)
 {
     int numLen;
     uint64_t *seeds = (uint64_t *)malloc(SEED_LENGTH * sizeof(uint64_t));
@@ -99,8 +99,6 @@ int convert(char *map[], int maplines, uint64_t *seeds, uint64_t arrSize)
 
     for (int i = 0; i < maplines; i++)
     {
-        printf("\t %d / %d\n", i, maplines);
-
         int c = 0;
         uint64_t destination = getNumberByIndexUint_t64(map[i], &c, &numLen);
         uint64_t source = getNumberByIndexUint_t64(map[i], &c, &numLen);
@@ -121,7 +119,7 @@ int convert(char *map[], int maplines, uint64_t *seeds, uint64_t arrSize)
         }
     }
 
-    for (int j = 0; j < arrSize; j++)
+    for (uint64_t j = 0; j < arrSize; j++)
     {
         if (seeds[j] == 0)
         {
@@ -131,7 +129,7 @@ int convert(char *map[], int maplines, uint64_t *seeds, uint64_t arrSize)
     free(newSeeds);
 }
 
-int tasktwo(char *lines[], int linecount)
+uint64_t tasktwo(char *lines[], int linecount)
 {
     int numLen;
     uint64_t length = 0;
@@ -144,7 +142,7 @@ int tasktwo(char *lines[], int linecount)
     }
 
     uint64_t *seeds = (uint64_t *)malloc(length * sizeof(uint64_t));
-    printf("size: %zu\n", length * sizeof(uint64_t));
+    printf("size of array in GB (poor RAM): %f\n", (length * sizeof(uint64_t)) * 1.0E-9);
 
 
     int index = 0;
@@ -164,7 +162,6 @@ int tasktwo(char *lines[], int linecount)
     char first;
     for (int i = 2; i < linecount; i++)
     {
-        printf("test %d / %d\n", i, linecount);
         first = lines[i][0];
         char last;
         if (strlen(lines[i]) > 1)
@@ -191,11 +188,11 @@ int tasktwo(char *lines[], int linecount)
     }
     if (first != '\n')
     {
-        convert(map, mapIndex, seeds, SEED_LENGTH);
+        convert(map, mapIndex, seeds, length);
     }
 
     uint64_t result = UINT64_MAX;
-    for (int i = 0; i < SEED_LENGTH; i++)
+    for (uint64_t i = 0; i < length; i++)
     {
         if (seeds[i] == 0)
         {
@@ -206,6 +203,5 @@ int tasktwo(char *lines[], int linecount)
             result = seeds[i];
         }
     }
-    printf("task 2 result? %" PRIu64 "\n", result);
     return result;
 }

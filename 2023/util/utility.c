@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 #include "utility.h"
 
@@ -37,10 +39,10 @@ int getNumberByIndex(char *string, int *index, int *numLen)
     return num;
 }
 
-unsigned long getNumberByIndexLong(char *string, int *index, int *numLen)
+uint64_t getNumberByIndexUint_t64(char *string, int *index, int *numLen)
 {
     int length = 0;
-    unsigned long num = 0;
+    uint64_t num = 0;
     for (int i = *index; i < strlen(string); i++)
     {
         long result = parseDecimalChar(string[i]);

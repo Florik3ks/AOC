@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 #include "../util/readinput.h"
 #include "../util/utility.h"
@@ -8,7 +10,6 @@
 #include "main.h"
 
 const int SEED_LENGTH = 20;
-const int SEED_LENGTH_2 = 2000;
 
 int main(int argc, char *argv[])
 {
@@ -29,13 +30,12 @@ int main(int argc, char *argv[])
 int taskone(char *lines[], int linecount)
 {
     int numLen;
-    unsigned long int seeds[SEED_LENGTH];
-    memset(seeds, 0, SEED_LENGTH * sizeof(unsigned long int));
+    uint64_t *seeds = (uint64_t *)malloc(SEED_LENGTH * sizeof(uint64_t));
 
     int index = 0;
     for (int i = 0; i < strlen(lines[0]);)
     {
-        int num = getNumberByIndex(lines[0], &i, &numLen);
+        uint64_t num = getNumberByIndexUint_t64(lines[0], &i, &numLen);
         if (num != 0)
         {
             seeds[index] = num;
@@ -45,9 +45,10 @@ int taskone(char *lines[], int linecount)
 
     char *map[50] = {""};
     int mapIndex = 0;
+    char first;
     for (int i = 2; i < linecount; i++)
     {
-        char first = lines[i][0];
+        first = lines[i][0];
         char last;
         if (strlen(lines[i]) > 1)
         {
@@ -56,7 +57,7 @@ int taskone(char *lines[], int linecount)
 
         if (first == '\n')
         {
-            convert(map, mapIndex, seeds);
+            convert(map, mapIndex, seeds, SEED_LENGTH);
         }
         else if (last == ':')
         {
@@ -71,35 +72,41 @@ int taskone(char *lines[], int linecount)
             mapIndex++;
         }
     }
-    convert(map, mapIndex, seeds);
+    if (first != '\n')
+    {
+        convert(map, mapIndex, seeds, SEED_LENGTH);
+    }
 
-    unsigned long int result = 2147483647L;
+    uint64_t result = UINT64_MAX;
     for (int i = 0; i < SEED_LENGTH; i++)
     {
         if (seeds[i] == 0)
         {
             continue;
         }
-        if(seeds[i] < result){
+        if (seeds[i] < result)
+        {
             result = seeds[i];
         }
     }
     return result;
 }
 
-int convert(char *map[], int maplines, unsigned long int *seeds)
+int convert(char *map[], int maplines, uint64_t *seeds, uint64_t arrSize)
 {
     int numLen;
-    unsigned long int newSeeds[SEED_LENGTH];
-    memset(newSeeds, 0, SEED_LENGTH * sizeof(unsigned long int));
+    uint64_t *newSeeds = (uint64_t *)malloc(arrSize * sizeof(uint64_t));
+
     for (int i = 0; i < maplines; i++)
     {
-        int c = 0;
-        int destination = getNumberByIndex(map[i], &c, &numLen);
-        int source = getNumberByIndex(map[i], &c, &numLen);
-        int range = getNumberByIndex(map[i], &c, &numLen);
+        printf("\t %d / %d\n", i, maplines);
 
-        for (int j = 0; j < SEED_LENGTH; j++)
+        int c = 0;
+        uint64_t destination = getNumberByIndexUint_t64(map[i], &c, &numLen);
+        uint64_t source = getNumberByIndexUint_t64(map[i], &c, &numLen);
+        uint64_t range = getNumberByIndexUint_t64(map[i], &c, &numLen);
+
+        for (int j = 0; j < arrSize; j++)
         {
             int seed = seeds[j];
             if (seed == 0)
@@ -114,30 +121,99 @@ int convert(char *map[], int maplines, unsigned long int *seeds)
         }
     }
 
-    for (int j = 0; j < SEED_LENGTH; j++)
+    for (int j = 0; j < arrSize; j++)
     {
         if (seeds[j] == 0)
         {
             seeds[j] = newSeeds[j];
         }
     }
+    free(newSeeds);
 }
 
 int tasktwo(char *lines[], int linecount)
 {
     int numLen;
-    int index = 0;
-    long long pain = 0;
+    uint64_t length = 0;
+    // get needed seed array length
     for (int i = 7; i < strlen(lines[0]);)
     {
-        int num1 = getNumberByIndex(lines[0], &i, &numLen);
-        int num2 = getNumberByIndex(lines[0], &i, &numLen);
-        pain += num2;
+        uint64_t num1 = getNumberByIndexUint_t64(lines[0], &i, &numLen);
+        uint64_t num2 = getNumberByIndexUint_t64(lines[0], &i, &numLen);
+        // v1 = 1737205559 ???
+        length += num2;
+
+        // v2 = 921250529 ???
+        // for (int k = num1; k < num1 + num2; k++)
+        // {
+        //     length++;
+        // }
+
+        // why are v1 and v2 not the same?
     }
 
+    uint64_t *seeds = (uint64_t *)malloc(length * sizeof(uint64_t));
+    printf("size: %zu\n", length * sizeof(uint64_t));
 
 
+    int index = 0;
+    for (int i = 7; i < strlen(lines[0]);)
+    {
+        uint64_t num1 = getNumberByIndexUint_t64(lines[0], &i, &numLen);
+        uint64_t num2 = getNumberByIndexUint_t64(lines[0], &i, &numLen);
+        for (int k = num1; k < num1 + num2; k++)
+        {
+            seeds[index] = k;
+            index++;
+        }
+    }
 
+    char *map[50] = {""};
+    int mapIndex = 0;
+    char first;
+    for (int i = 2; i < linecount; i++)
+    {
+        printf("test %d / %d\n", i, linecount);
+        first = lines[i][0];
+        char last;
+        if (strlen(lines[i]) > 1)
+        {
+            last = lines[i][strlen(lines[i]) - 2]; // last is always \n\0
+        }
 
+        if (first == '\n')
+        {
+            convert(map, mapIndex, seeds, length);
+        }
+        else if (last == ':')
+        {
+            for (; mapIndex > 0; mapIndex--)
+            {
+                map[mapIndex] = "";
+            }
+        }
+        else
+        {
+            map[mapIndex] = lines[i];
+            mapIndex++;
+        }
+    }
+    if (first != '\n')
+    {
+        convert(map, mapIndex, seeds, SEED_LENGTH);
+    }
 
+    uint64_t result = UINT64_MAX;
+    for (int i = 0; i < SEED_LENGTH; i++)
+    {
+        if (seeds[i] == 0)
+        {
+            continue;
+        }
+        if (seeds[i] < result)
+        {
+            result = seeds[i];
+        }
+    }
+    return result;
 }

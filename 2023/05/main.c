@@ -99,6 +99,7 @@ int convert(char *map[], int maplines, uint64_t *seeds, uint64_t arrSize)
 
     for (int i = 0; i < maplines; i++)
     {
+        printf("\t map %d / %d\n", i, maplines);
         int c = 0;
         uint64_t destination = getNumberByIndexUint_t64(map[i], &c, &numLen);
         uint64_t source = getNumberByIndexUint_t64(map[i], &c, &numLen);
@@ -162,6 +163,7 @@ uint64_t tasktwo(char *lines[], int linecount)
     char first;
     for (int i = 2; i < linecount; i++)
     {
+        printf("line %d / %d\n", i, linecount);
         first = lines[i][0];
         char last;
         if (strlen(lines[i]) > 1)

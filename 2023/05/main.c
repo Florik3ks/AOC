@@ -140,16 +140,7 @@ int tasktwo(char *lines[], int linecount)
     {
         uint64_t num1 = getNumberByIndexUint_t64(lines[0], &i, &numLen);
         uint64_t num2 = getNumberByIndexUint_t64(lines[0], &i, &numLen);
-        // v1 = 1737205559 ???
         length += num2;
-
-        // v2 = 921250529 ???
-        // for (int k = num1; k < num1 + num2; k++)
-        // {
-        //     length++;
-        // }
-
-        // why are v1 and v2 not the same?
     }
 
     uint64_t *seeds = (uint64_t *)malloc(length * sizeof(uint64_t));
@@ -215,5 +206,6 @@ int tasktwo(char *lines[], int linecount)
             result = seeds[i];
         }
     }
+    printf("task 2 result? %" PRIu64 "\n", result);
     return result;
 }

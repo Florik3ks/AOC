@@ -3,6 +3,7 @@
 
 int contains(int a[], int num, int max);
 int getNumberByIndex(char *string, int *index, int *numLen);
+unsigned long getNumberByIndexLong(char *string, int *index, int *numLen);
 int parseDecimalChar(char c);
 
 #endif

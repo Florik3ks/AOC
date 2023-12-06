@@ -76,11 +76,9 @@ uint64_t taskone(char *lines[], int linecount)
         {
             if ((time - i) * i > dist)
             {
-                // printf("\t race %d is winnable with %d\n", race, i);
                 waysToWin++;
             }
         }
-        // printf("race %d has %d ways to win\n", race, waysToWin);
         result *= waysToWin;
     }
 

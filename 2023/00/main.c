@@ -1,18 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 #include "../util/readinput.h"
 #include "../util/utility.h"
 
 #include "main.h"
 
-
 int main(int argc, char *argv[])
 {
     char *lines[5000];
     int lineCount;
-    if(argc < 2){
+    if (argc < 2)
+    {
         fprintf(stderr, "no input file\n");
         exit(0);
     }
@@ -23,13 +25,12 @@ int main(int argc, char *argv[])
     printf("task two: %d\n", tasktwo(lines, lineCount));
 }
 
-int taskone(char *lines[], int linecount)
+uint64_t taskone(char *lines[], int linecount)
 {
     return -1;
 }
 
-
-int tasktwo(char *lines[], int linecount)
+uint64_t tasktwo(char *lines[], int linecount)
 {
     return -1;
 }

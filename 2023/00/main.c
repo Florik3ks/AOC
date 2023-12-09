@@ -21,8 +21,8 @@ int main(int argc, char *argv[])
     printf("%s with %s\n", argv[0], argv[1]);
     readinput(lines, &lineCount, argv[1]);
 
-    printf("task one: %d\n", taskone(lines, lineCount));
-    printf("task two: %d\n", tasktwo(lines, lineCount));
+    printf("task one: %llu\n", taskone(lines, lineCount));
+    printf("task two: %llu\n", tasktwo(lines, lineCount));
 }
 
 uint64_t taskone(char *lines[], int linecount)

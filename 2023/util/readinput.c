@@ -14,7 +14,7 @@ int readinput(char *lines[], int *lineCount, char *inputfile)
         exit(1);
     }
 
-    char line[256];
+    char line[512];
     int lc = 0;
     while (fgets(line, sizeof(line), fp) != NULL)
     {

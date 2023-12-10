@@ -22,6 +22,12 @@ int getNumberByIndex(char *string, int *index, int *numLen)
 {
     int length = 0;
     int num = 0;
+    int isNegative = 0;
+    if (string[*index] == '-')
+    {
+        *index = *index + 1;
+        isNegative = 1;
+    }
     for (int i = *index; i < strlen(string); i++)
     {
         int result = parseDecimalChar(string[i]);
@@ -29,14 +35,14 @@ int getNumberByIndex(char *string, int *index, int *numLen)
         if (result == -1)
         {
             *numLen = length;
-            return num;
+            return num * (isNegative ? -1 : 1);
         }
         length++;
         num *= 10;
         num += result;
     }
     *numLen = length;
-    return num;
+    return num * (isNegative ? -1 : 1);
 }
 
 uint64_t getNumberByIndexUint_t64(char *string, int *index, int *numLen)

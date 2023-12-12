@@ -2,14 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <pthread.h>
 #include <inttypes.h>
 #include <sys/time.h>
-
 #include "../util/readinput.h"
 #include "../util/utility.h"
 
-#include "main.h"
-
+#include "multithreading_test.h"
 
 const int SEED_LENGTH = 20;
 
@@ -152,43 +151,83 @@ int convert(char *map[], int maplines, uint64_t *seeds, uint64_t arrSize)
     free(newSeeds);
 }
 
+uint64_t taskTwoResult = UINT64_MAX;
+struct thread_info
+{
+    int id;
+    uint64_t *seeds;
+    uint64_t length;
+    char **lines;
+    int linecount;
+};
+int inputlinecount;
+
 uint64_t tasktwo(char *lines[], int linecount)
 {
     int numLen;
     uint64_t length = 0;
+    pthread_t threads[7];
+    int rc;
+    int threadID = 1;
     // get needed seed array length
     for (int i = 7; i < strlen(lines[0]);)
     {
         uint64_t num1 = getNumberByIndexUint_t64(lines[0], &i, &numLen);
         uint64_t num2 = getNumberByIndexUint_t64(lines[0], &i, &numLen);
-        length += num2;
-    }
-
-    uint64_t *seeds = (uint64_t *)malloc(length * sizeof(uint64_t));
-    printf("size of array in GB (poor RAM): %f\n", (length * sizeof(uint64_t)) * 1.0E-9);
-
-    int index = 0;
-    for (int i = 7; i < strlen(lines[0]);)
-    {
-        uint64_t num1 = getNumberByIndexUint_t64(lines[0], &i, &numLen);
-        uint64_t num2 = getNumberByIndexUint_t64(lines[0], &i, &numLen);
-        for (int k = num1; k < num1 + num2; k++)
+        uint64_t *seeds = (uint64_t *)malloc(num2 * sizeof(uint64_t));
+        for (uint64_t j = 0; j < num2; j++)
         {
-            seeds[index] = k;
-            index++;
+            seeds[j] = num1 + j;
+        }
+        struct thread_info *tinfo;
+        tinfo = malloc(sizeof(struct thread_info));
+        tinfo->id = threadID;
+        tinfo->seeds = seeds;
+        tinfo->length = num2;
+        tinfo->lines = lines;
+        tinfo->linecount = linecount;
+
+        printf("creating thread %d with array size %fGB\n", threadID, (num2 * sizeof(uint64_t)) * 1.0E-9);
+
+        rc = pthread_create(&threads[threadID], NULL, taskTwoThread, tinfo);
+        threadID++;
+        if (rc)
+        {
+            printf("Unable to create thread, %d", rc);
+            exit(-1);
         }
     }
+
+    for (int i = 0; i < threadID; i++)
+    {
+        pthread_join(i, NULL);
+    }
+
+    return taskTwoResult;
+}
+
+void *taskTwoThread(void *arg)
+{
+    // Store the value argument passed to this thread
+    struct thread_info *tinfo = arg;
+    uint64_t length = tinfo->length;
+    uint64_t *seeds = tinfo->seeds;
+
+    char **input = tinfo->lines;
+    int inputlinecount = tinfo->linecount;
+
+    int numLen;
 
     char *map[50] = {""};
     int mapIndex = 0;
     char first;
-    for (int i = 2; i < linecount; i++)
+    for (int i = 2; i < inputlinecount; i++)
     {
-        first = lines[i][0];
+        first = input[i][0];
         char last;
-        if (strlen(lines[i]) > 1)
+        if (strlen(input[i]) > 1)
         {
-            last = lines[i][strlen(lines[i]) - 2]; // last is always \n\0
+            last = input[i][strlen(input[i]) - 2]; // last is always \n\0
         }
 
         if (first == '\n')
@@ -204,7 +243,7 @@ uint64_t tasktwo(char *lines[], int linecount)
         }
         else
         {
-            map[mapIndex] = lines[i];
+            map[mapIndex] = input[i];
             mapIndex++;
         }
     }
@@ -213,17 +252,18 @@ uint64_t tasktwo(char *lines[], int linecount)
         convert(map, mapIndex, seeds, length);
     }
 
-    uint64_t result = UINT64_MAX;
-    for (uint64_t i = 0; i < length; i++)
+    uint64_t min = UINT64_MAX;
+    for (int i = 0; i < length; i++)
     {
-        if (seeds[i] == 0)
+        if (seeds[i] < min)
         {
-            continue;
+            min = seeds[i];
         }
-        if (seeds[i] < result)
+        if (seeds[i] < taskTwoResult)
         {
-            result = seeds[i];
+            taskTwoResult = seeds[i];
         }
     }
-    return result;
+
+    printf("thread %d done with minimum %llu\n", tinfo->id, min);
 }

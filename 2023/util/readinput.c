@@ -28,7 +28,7 @@ int readinput(char *lines[], int *lineCount, char *inputfile)
 }
 
 
-int readinputCustomLinelength(char *lines[], int *lineCount, char *inputfile, int linelength)
+int readinputLongLine(char *lines[], int *lineCount, char *inputfile)
 {
 
     int i = 0;
@@ -40,7 +40,7 @@ int readinputCustomLinelength(char *lines[], int *lineCount, char *inputfile, in
         exit(1);
     }
 
-    char *line = malloc(sizeof(char) * linelength);
+    char line[100000];
     int lc = 0;
     while (fgets(line, sizeof(line), fp) != NULL)
     {

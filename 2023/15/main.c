@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
         exit(0);
     }
     printf("%s with %s\n", argv[0], argv[1]);
-    readinputCustomLinelength(lines, &lineCount, argv[1], 1048576);
+    readinputLongLine(lines, &lineCount, argv[1]);
 
     struct timeval start, stop;
     double secs = 0;
@@ -65,7 +65,6 @@ uint64_t taskone(char *lines[], int linecount)
         }
     }
     sum += hash(current);
-    printf("A \"%s\"\n", current);
     return sum;
 }
 

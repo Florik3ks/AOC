@@ -30,6 +30,7 @@ uint64_t taskone(char *lines[], int linecount);
 Adjacent getAdjacent(char *lines[], Vector2 v);
 Vector2 getNextPos(char *lines[], Vector2 old, Vector2 new);
 uint64_t tasktwo(char *lines[], int linecount);
+int containsVec2(Vector2 *loop, Vector2 pos, size_t loopsize);
 
 
 #endif

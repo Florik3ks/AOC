@@ -202,6 +202,150 @@ Vector2 getNextPos(char *lines[], Vector2 old, Vector2 new)
 
 uint64_t tasktwo(char *lines[], int linecount)
 {
+    Node *nodes = malloc(linecount * strlen(lines[0]) * sizeof(Node));
+    Node start;
+
+    // get start position
+    for (size_t i = 0; i < linecount; i++)
+    {
+        for (size_t j = 0; j < strlen(lines[i]); j++)
+        {
+            char ch = lines[i][j];
+            int n, e, s, w = 0;
+            if (ch == 'S')
+            {
+                char next;
+                if (i > 0)
+                {
+                    next = lines[i - 1][j];
+                    if (next == '|' || next == 'F' || next == '7')
+                    {
+                        n = 1;
+                    }
+                }
+                if (i + 1 < linecount)
+                {
+                    next = lines[i + 1][j];
+                    if (next == '|' || next == 'J' || next == 'L')
+                    {
+                        s = 1;
+                    }
+                }
+                if (j > 0)
+                {
+                    next = lines[i][j - 1];
+                    if (next == '-' || next == 'F' || next == 'L')
+                    {
+                        w = 1;
+                    }
+                }
+                if (j + 1 < strlen(lines[0]))
+                {
+                    next = lines[i][j + 1];
+                    if (next == '-' || next == 'J' || next == '7')
+                    {
+                        e = 1;
+                    }
+                }
+
+                if (n && e)
+                {
+                    start.symbol = 'L';
+                }
+                if (n && w)
+                {
+                    start.symbol = 'J';
+                }
+                if (s && e)
+                {
+                    start.symbol = 'F';
+                }
+                if (s && w)
+                {
+                    start.symbol = '7';
+                }
+                lines[i][j] = start.symbol;
+                Vector2 pos = {j, i};
+                start.pos = pos;
+            }
+        }
+    }
+    // get loop size
+    Adjacent startAdjacent = getAdjacent(lines, start.pos);
+    Vector2 old = start.pos;
+    Vector2 pos = startAdjacent.v1;
+    size_t loopsize = 1;
+    while (!(pos.x == start.pos.x && pos.y == start.pos.y))
+    {
+        Vector2 tmpOld = pos;
+        pos = getNextPos(lines, old, pos);
+        old = tmpOld;
+        loopsize++;
+    }
+
+    // create array that holds all positions
+    Vector2 *mainloop = malloc(loopsize * sizeof(Vector2));
+    mainloop[0] = start.pos;
+    size_t index = 1;
+
+    startAdjacent = getAdjacent(lines, start.pos);
+    old = start.pos;
+    pos = startAdjacent.v1;
+    while (!(pos.x == start.pos.x && pos.y == start.pos.y))
+    {
+        // printf("c at (%d, %d) - %c\n", pos.x, pos.y, lines[pos.y][pos.x]);
+        mainloop[index++] = pos;
+        Vector2 tmpOld = pos;
+        pos = getNextPos(lines, old, pos);
+        old = tmpOld;
+    }
+    // add last pos to loop array
+    mainloop[index] = pos;
+
+    // for (size_t i = 0; i < loopsize; i++)
+    // {
+    //     printf("in loop: (%d, %d)\n", mainloop[i].x, mainloop[i].y);
+    // }
+
+    size_t len = linecount * strlen(lines[0]);
+    Vector2 *possiblyEnclosed = malloc(sizeof(Vector2) * len);
+    Vector2 m_one = {-1, -1};
+    for (size_t i = 0; i < len; i++)
+    {
+        possiblyEnclosed[i] = m_one;
+    }
+    int p_enclosed_index = 0;
+    // blank out all positions in array that are not part of the loop
+    for (size_t i = 0; i < linecount; i++)
+    {
+        for (size_t j = 0; j < strlen(lines[i]); j++)
+        {
+            if (lines[i][j] == '\n')
+            {
+                continue;
+            }
+            Vector2 pos = {j, i};
+            if (!containsVec2(mainloop, pos, loopsize))
+            {
+                lines[i][j] = '.';
+                possiblyEnclosed[p_enclosed_index++] = pos;
+            }
+            printf("%c", lines[i][j]);
+        }
+        printf("\n");
+    }
     // i dont know i spent too much time trying to do things that did not work
+    return 0;
+}
+
+int containsVec2(Vector2 *loop, Vector2 pos, size_t loopsize)
+{
+    for (size_t i = 0; i < loopsize; i++)
+    {
+        if (loop[i].x == pos.x && loop[i].y == pos.y)
+        {
+            return 1;
+        }
+    }
     return 0;
 }

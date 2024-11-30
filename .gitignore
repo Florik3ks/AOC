@@ -1,11 +1,2 @@
 input.txt
 .vscode
-bin
-obj
-
-
-aoc22.csproj
-aoc.csproj
-*.csproj
-*.out
-*.exe

@@ -16,28 +16,28 @@ fn main() {
 pub fn p1(input: &str) -> i32 {
     let mut result: i32 = 0;
 
-    let mut numbersLeft: Vec<i32> = Vec::new();
-    let mut numbersRight: Vec<i32> = Vec::new();
+    let mut numbers_left: Vec<i32> = Vec::new();
+    let mut numbers_right: Vec<i32> = Vec::new();
 
     input.lines().for_each(|line| {
         let mut parts = line.split_whitespace();
-        numbersLeft.push(parts.next().unwrap().parse().unwrap());
-        numbersRight.push(parts.next_back().unwrap().parse().unwrap());
+        numbers_left.push(parts.next().unwrap().parse().unwrap());
+        numbers_right.push(parts.next_back().unwrap().parse().unwrap());
     });
 
-    let num = numbersLeft.len() - 1;
+    let num = numbers_left.len() - 1;
     for n in 0..=num {
-        let mut minL = 0;
-        let mut minR = 0;
-        for i in 0..=numbersLeft.len() - 1{
-            if numbersLeft[i] < numbersLeft[minL] {
-                minL = i;
+        let mut min_l = 0;
+        let mut min_r = 0;
+        for i in 0..=numbers_left.len() - 1{
+            if numbers_left[i] < numbers_left[min_l] {
+                min_l = i;
             }
-            if numbersRight[i] < numbersRight[minR] {
-                minR = i;
+            if numbers_right[i] < numbers_right[min_r] {
+                min_r = i;
             }
         }
-        result += (numbersLeft.remove(minL) - numbersRight.remove(minR)).abs();
+        result += (numbers_left.remove(min_l) - numbers_right.remove(min_r)).abs();
     }
 
     return result;
@@ -46,22 +46,22 @@ pub fn p1(input: &str) -> i32 {
 pub fn p2(input: &str) -> i32 {
     let mut result: i32 = 0;
 
-    let mut numbersLeft: Vec<i32> = Vec::new();
-    let mut numbersRight: Vec<i32> = Vec::new();
+    let mut numbers_left: Vec<i32> = Vec::new();
+    let mut numbers_right: Vec<i32> = Vec::new();
 
     input.lines().for_each(|line| {
         let mut parts = line.split_whitespace();
-        numbersLeft.push(parts.next().unwrap().parse().unwrap());
-        numbersRight.push(parts.next_back().unwrap().parse().unwrap());
+        numbers_left.push(parts.next().unwrap().parse().unwrap());
+        numbers_right.push(parts.next_back().unwrap().parse().unwrap());
     });
 
-    let num = numbersLeft.len() - 1;
+    let num = numbers_left.len() - 1;
     for n in 0..=num {
-        let current = numbersLeft[n];
+        let current = numbers_left[n];
 
         let mut count = 0;
-        for i in 0..=numbersRight.len() - 1{
-            if numbersRight[i] == current{
+        for i in 0..=numbers_right.len() - 1{
+            if numbers_right[i] == current{
                 count += 1;
             }
         }

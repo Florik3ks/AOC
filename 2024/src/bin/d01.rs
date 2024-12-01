@@ -25,11 +25,11 @@ pub fn p1(input: &str) -> i32 {
         numbers_right.push(parts.next_back().unwrap().parse().unwrap());
     });
 
-    let num = numbers_left.len() - 1;
-    for n in 0..=num {
+    let num = numbers_left.len();
+    for n in 0..num {
         let mut min_l = 0;
         let mut min_r = 0;
-        for i in 0..=numbers_left.len() - 1{
+        for i in 0..numbers_left.len(){
             if numbers_left[i] < numbers_left[min_l] {
                 min_l = i;
             }
@@ -55,12 +55,12 @@ pub fn p2(input: &str) -> i32 {
         numbers_right.push(parts.next_back().unwrap().parse().unwrap());
     });
 
-    let num = numbers_left.len() - 1;
-    for n in 0..=num {
+    let num = numbers_left.len();
+    for n in 0..num {
         let current = numbers_left[n];
 
         let mut count = 0;
-        for i in 0..=numbers_right.len() - 1{
+        for i in 0..numbers_right.len(){
             if numbers_right[i] == current{
                 count += 1;
             }

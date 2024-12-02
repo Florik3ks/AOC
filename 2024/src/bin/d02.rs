@@ -9,8 +9,9 @@ fn main() {
     let mut input = String::new();
     file.read_to_string(&mut input).expect("cannot read file");
 
-    println!("{}", p1(&input));
-    println!("{}", p2(&input));
+    println!("p1: \t{}", p1(&input));
+    println!("p2: \t{}", p2(&input));
+    println!("p2alt: \t{}", p2alt(&input));
 }
 
 pub fn p1(input: &str) -> i32 {
@@ -50,46 +51,6 @@ pub fn p2(input: &str) -> i32 {
             .flat_map(|f| f.parse::<i32>())
             .collect();
 
-        //
-        // stuff i tried first for way too long, does not work because whatever, idk
-        //
-
-        // let mut valid_strike = false;
-
-        // let mut up = split[0] < split[1];
-
-        // let mut valid;
-        // // check if first pair works
-        // // if not, extra logic is needed to determine if numbers should go up or down
-        // if !check(split[0], split[1], up) {
-        //     valid_strike = true;
-        //     // try remove [1]
-        //     up = split[0] < split[2];
-        //     let temp = split[1];
-        //     split[1] = split[0];
-        //     valid = rest(split.clone(), 1, up, valid_strike);
-        //     // if not valid, remove [0] instead
-        //     if !valid {
-        //         split[1] = temp;
-        //         up = split[1] < split[2];
-        //     }
-        // }
-
-        // valid = rest(split.clone(), 1, up, valid_strike);
-        // if !valid && !valid_strike {
-        //     valid_strike = true;
-        //     up = split[1] < split[2];
-        //     valid = rest(split, 1, up, valid_strike);
-        // }
-
-        // if valid {
-        //     result += 1
-        // }
-        // else{
-        //     println!("{}", line);
-        //     println!("up: {} strike: {}", up, valid_strike);
-        // }
-
         let mut valid = checkline(split.clone());
         for i in 0..split.len() {
             let mut cpy = split.clone();
@@ -105,6 +66,63 @@ pub fn p2(input: &str) -> i32 {
     return result;
 }
 
+pub fn p2alt(input: &str) -> i32 {
+    let mut result = 0;
+    for line in input.lines() {
+        let mut split: Vec<i32> = line
+            .split_whitespace()
+            .flat_map(|f| f.parse::<i32>())
+            .collect();
+
+        //
+        // bad alternative solution
+        //
+
+        let mut valid_strike = false;
+
+        let mut up = split[0] < split[1];
+
+        let mut valid;
+        // check if first pair works
+        // if not, extra logic is needed to determine if numbers should go up or down
+        if !check(split[0], split[1], up) {
+            valid_strike = true;
+            // try remove [1]
+            up = split[0] < split[2];
+            let temp = split[1];
+            split[1] = split[0];
+            valid = rest(split.clone(), 1, up, valid_strike);
+            // if not valid, remove [0] instead
+            if !valid {
+                split[1] = temp;
+                up = split[1] < split[2];
+            }
+        }
+
+        valid = rest(split.clone(), 1, up, valid_strike);
+        if !valid && !valid_strike {
+            valid_strike = true;
+            // try remove [1]
+            up = split[0] < split[2];
+            let temp = split[1];
+            split[1] = split[0];
+            valid = rest(split.clone(), 1, up, valid_strike);
+            // if not valid, remove [0] instead
+            if !valid {
+                split[1] = temp;
+                up = split[1] < split[2];
+                valid = rest(split.clone(), 1, up, valid_strike);
+            }
+        }
+
+        if valid {
+            result += 1;
+        }
+    }
+    return result;
+}
+
+
 fn rest(mut split: Vec<i32>, i: usize, up: bool, mut strike: bool) -> bool {
     if i >= split.len() - 1 {
         return true;
@@ -114,7 +132,7 @@ fn rest(mut split: Vec<i32>, i: usize, up: bool, mut strike: bool) -> bool {
         // println!("{:?} {:?} aaa", split[i], split[i + 1]);
         if !strike {
             strike = true;
-            if check(split[i - 1], split[i + 1], up) {
+            if check(split[i - 1], split[i + 1], up) && rest(split.clone(), i + 1, up, strike){
                 // remove first
                 split[i] = split[i - 1];
             } else {
@@ -217,5 +235,15 @@ mod test {
     #[test]
     fn mt7() {
         assert_eq!(p2("4 5 3 2 6"), 0);
+    }
+
+    #[test]
+    fn mt8() {
+        assert_eq!(p2("67 66 70 72 73"), 1);
+    }
+
+    #[test]
+    fn mt9(){
+        assert_eq!(p2("14 16 18 19 21 24 22 27"), 1)
     }
 }

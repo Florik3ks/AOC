@@ -46,7 +46,7 @@ pub fn p1(input: &str) -> i32 {
 pub fn p2(input: &str) -> i32 {
     let mut result = 0;
     for line in input.lines() {
-        let mut split: Vec<i32> = line
+        let split: Vec<i32> = line
             .split_whitespace()
             .flat_map(|f| f.parse::<i32>())
             .collect();
@@ -64,86 +64,6 @@ pub fn p2(input: &str) -> i32 {
         }
     }
     return result;
-}
-
-pub fn p2alt(input: &str) -> i32 {
-    let mut result = 0;
-    for line in input.lines() {
-        let mut split: Vec<i32> = line
-            .split_whitespace()
-            .flat_map(|f| f.parse::<i32>())
-            .collect();
-
-        //
-        // bad alternative solution
-        //
-
-        let mut valid_strike = false;
-
-        let mut up = split[0] < split[1];
-
-        let mut valid;
-        // check if first pair works
-        // if not, extra logic is needed to determine if numbers should go up or down
-        if !check(split[0], split[1], up) {
-            valid_strike = true;
-            // try remove [1]
-            up = split[0] < split[2];
-            let temp = split[1];
-            split[1] = split[0];
-            valid = rest(split.clone(), 1, up, valid_strike);
-            // if not valid, remove [0] instead
-            if !valid {
-                split[1] = temp;
-                up = split[1] < split[2];
-            }
-        }
-
-        valid = rest(split.clone(), 1, up, valid_strike);
-        if !valid && !valid_strike {
-            valid_strike = true;
-            // try remove [1]
-            up = split[0] < split[2];
-            let temp = split[1];
-            split[1] = split[0];
-            valid = rest(split.clone(), 1, up, valid_strike);
-            // if not valid, remove [0] instead
-            if !valid {
-                split[1] = temp;
-                up = split[1] < split[2];
-                valid = rest(split.clone(), 1, up, valid_strike);
-            }
-        }
-
-        if valid {
-            result += 1;
-        }
-    }
-    return result;
-}
-
-
-fn rest(mut split: Vec<i32>, i: usize, up: bool, mut strike: bool) -> bool {
-    if i >= split.len() - 1 {
-        return true;
-    }
-
-    if !check(split[i], split[i + 1], up) {
-        // println!("{:?} {:?} aaa", split[i], split[i + 1]);
-        if !strike {
-            strike = true;
-            if check(split[i - 1], split[i + 1], up) && rest(split.clone(), i + 1, up, strike){
-                // remove first
-                split[i] = split[i - 1];
-            } else {
-                // remove second
-                split[i + 1] = split[i];
-            }
-        } else {
-            return false;
-        }
-    }
-    return rest(split, i + 1, up, strike);
 }
 
 fn checkline(split: Vec<i32>) -> bool {
@@ -172,6 +92,89 @@ fn check(num_a: i32, num_b: i32, up: bool) -> bool {
     }
     return true;
 }
+
+
+// alternative (bad) solution
+pub fn p2alt(input: &str) -> i32 {
+    let mut result = 0;
+    for line in input.lines() {
+        let mut split: Vec<i32> = line
+            .split_whitespace()
+            .flat_map(|f| f.parse::<i32>())
+            .collect();
+
+        //
+        // bad alternative solution
+        //
+
+        let mut valid_strike = false;
+
+        let mut up = split[0] < split[1];
+
+        let mut valid;
+        // check if first pair works
+        // if not, extra logic is needed to determine if numbers should go up or down
+        if !check(split[0], split[1], up) {
+            valid_strike = true;
+            // try remove [1]
+            up = split[0] < split[2];
+            let temp = split[1];
+            split[1] = split[0];
+            valid = solve(split.clone(), 1, up, valid_strike);
+            // if not valid, remove [0] instead
+            if !valid {
+                split[1] = temp;
+                up = split[1] < split[2];
+            }
+        }
+
+        valid = solve(split.clone(), 1, up, valid_strike);
+        if !valid && !valid_strike {
+            valid_strike = true;
+            // try remove [1]
+            up = split[0] < split[2];
+            let temp = split[1];
+            split[1] = split[0];
+            valid = solve(split.clone(), 1, up, valid_strike);
+            // if not valid, remove [0] instead
+            if !valid {
+                split[1] = temp;
+                up = split[1] < split[2];
+                valid = solve(split.clone(), 1, up, valid_strike);
+            }
+        }
+
+        if valid {
+            result += 1;
+        }
+    }
+    return result;
+}
+
+
+fn solve(mut split: Vec<i32>, i: usize, up: bool, mut strike: bool) -> bool {
+    if i >= split.len() - 1 {
+        return true;
+    }
+
+    if !check(split[i], split[i + 1], up) {
+        // println!("{:?} {:?} aaa", split[i], split[i + 1]);
+        if !strike {
+            strike = true;
+            if check(split[i - 1], split[i + 1], up) && solve(split.clone(), i + 1, up, strike){
+                // remove first
+                split[i] = split[i - 1];
+            } else {
+                // remove second
+                split[i + 1] = split[i];
+            }
+        } else {
+            return false;
+        }
+    }
+    return solve(split, i + 1, up, strike);
+}
+
 
 #[cfg(test)]
 mod test {

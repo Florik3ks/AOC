@@ -218,7 +218,6 @@ SAXAMASAAA
 MAMMMXMMMM
 MXMXAXMASX";
         assert_eq!(p1(example), expected);
-        assert!(false);
     }
 
     #[test]
@@ -235,6 +234,5 @@ SAXAMASAAA
 MAMMMXMMMM
 MXMXAXMASX";
         assert_eq!(p2(example), expected);
-        assert!(false);
     }
 }

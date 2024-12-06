@@ -1,5 +1,5 @@
-use std::process::exit;
 use std::time::Instant;
+use std::vec;
 use std::{fs::File, io::Read};
 
 fn main() {
@@ -33,6 +33,12 @@ fn main() {
 }
 
 pub fn p1(input: &str) -> i32 {
+    let lines = get_path(input);
+
+    return lines.len() as i32;
+}
+
+fn get_path(input: &str) -> Vec<(usize, usize)> {
     let mut lines: Vec<Vec<char>> = input
         .lines()
         .map(|f| {
@@ -92,13 +98,20 @@ pub fn p1(input: &str) -> i32 {
         lines[ny][nx] = 'X';
     }
 
-    return lines
-        .iter()
-        .map(|f| f.iter().filter(|x| **x == 'X').count())
-        .sum::<usize>() as i32;
+    let mut path: Vec<(usize, usize)> = vec![];
+    for y in 0..lines.len() {
+        for x in 0..lines[y].len() {
+            if lines[y][x] == 'X' {
+                path.push((x, y));
+            }
+        }
+    }
+    return path;
 }
 
 pub fn p2(input: &str) -> i32 {
+    let path = get_path(input);
+
     let mut lines: Vec<Vec<char>> = input
         .lines()
         .map(|f| {
@@ -111,9 +124,13 @@ pub fn p2(input: &str) -> i32 {
         })
         .collect();
 
-    let mut result = lines.clone();
+    let dirs: [(isize, isize); 4] = [
+        (0, -1), // up
+        (1, 0),  // right
+        (0, 1),  // down
+        (-1, 0), // left
+    ];
 
-    // get guard pos
     let mut guardpos: (usize, usize) = (0, 0);
     for y in 0..lines.len() {
         for x in 0..lines[y].len() {
@@ -124,40 +141,45 @@ pub fn p2(input: &str) -> i32 {
         }
     }
 
+    let mut r = 0;
+    let mut why: Vec<(usize, usize)> = vec![];
+    for (x, y) in path {
+        if x == guardpos.0 && y == guardpos.1 {
+            continue;
+        }
+        lines[y][x] = '#';
+        if place_wall_creates_loop(&mut lines, (guardpos.0, guardpos.1), dirs, 0) {
+            r += 1;
+            why.push((x, y));
+        }
+        lines[y][x] = '.';
+    }
+
+    return r;
+    // ----------------------------------
+
+    let mut result = lines.clone();
     let mut dir_index = 0;
-    let dirs: [(isize, isize); 4] = [
-        (0, -1), // up
-        (1, 0),  // right
-        (0, 1),  // down
-        (-1, 0), // left
-    ];
-    let mut condition = true;
-    while condition {
+
+    loop {
         let (cx, cy) = guardpos;
         let nx: usize = match cx.checked_add_signed(dirs[dir_index].0) {
             Some(v) => v,
             None => {
-                condition = false;
-                continue;
+                break;
             }
         };
         let ny: usize = match cy.checked_add_signed(dirs[dir_index].1) {
             Some(v) => v,
             None => {
-                condition = false;
-                continue;
+                break;
             }
         };
         if ny >= lines.len() || nx >= lines[ny].len() {
-            condition = false;
-            continue;
+            break;
         }
 
         if lines[ny][nx] == '#' {
-            if result[cy][cx] != '0' {
-                result[cy][cx] = '+';
-            }
-            lines[cy][cx] = '+';
             dir_index += 1;
             dir_index %= dirs.len();
             continue;
@@ -165,32 +187,31 @@ pub fn p2(input: &str) -> i32 {
 
         if result[ny][nx] != '0' {
             // search if the loop is possible
+            let temp = lines[ny][nx];
+            lines[ny][nx] = '0';
             if place_wall_creates_loop(&mut lines, (cx, cy), dirs, dir_index) {
                 result[ny][nx] = '0';
+                if why.contains(&(nx, ny)) {
+                    println!("aaaa {:?} {:?}", cx, cy)
+                }
             }
+            lines[ny][nx] = temp;
         }
 
         guardpos = (nx, ny);
 
+        // if result[ny][nx] != '0' {
         lines[ny][nx] = match dir_index {
-            0 => '^',
-            1 => '>',
-            2 => 'v',
-            3 => '<',
+            0 => '|',
+            1 => '-',
+            2 => '|',
+            3 => '-',
             _ => 'E', //rror
         };
-        
-        if result[ny][nx] != '0' {
-            result[ny][nx] = match dir_index {
-                0 => '|',
-                1 => '-',
-                2 => '|',
-                3 => '-',
-                _ => 'E', //rror
-            };
-        }
+        // }
     }
 
+    pretty_print(&lines, vec![]);
     return result
         .iter()
         .map(|f| f.iter().filter(|x| **x == '0').count())
@@ -198,21 +219,6 @@ pub fn p2(input: &str) -> i32 {
 }
 
 fn pretty_print(lines: &Vec<Vec<char>>, pretty: Vec<(usize, usize)>) {
-    use colored::Colorize; // debug purposes
-    println!("{}", "-----------".purple());
-    for y in 0..lines.len() {
-        for x in 0..lines[y].len() {
-            if pretty.contains(&(x, y)) {
-                print!("{}", lines[y][x].to_string().red())
-            } else {
-                print!("{}", lines[y][x].to_string().bright_blue());
-            }
-        }
-        println!()
-    }
-}
-
-fn pretty_print2(lines: &Vec<Vec<char>>, pretty: Vec<(usize, usize)>) {
     use colored::Colorize; // debug purposes
     println!("{}", "-----------".purple());
     for y in 0..lines.len() {
@@ -233,35 +239,19 @@ fn place_wall_creates_loop(
     dirs: [(isize, isize); 4],
     dir_index: usize,
 ) -> bool {
-    // println!("try place wall");
-    let mut new_dir_index = (dir_index + 1) % dirs.len();
+    // println!("try place wall {:?}", dir_index);
+    let mut new_dir_index = dir_index;
     let mut nx = cx;
     let mut ny = cy;
     let mut visited: Vec<(usize, usize, usize)> = vec![];
     loop {
-        let new_dir = dirs[new_dir_index];
-        let search_for = match (dir_index + 1) % dirs.len() {
-            0 => '^',
-            1 => '>',
-            2 => 'v',
-            3 => '<',
-            _ => 'E', //rror
-        };
-
-        if visited.contains(&(nx, ny, new_dir_index)) {
-            // println!("visited before2");
-            // pretty_print2(lines, visited.iter().map(|f| (f.0, f.1)).collect());
-            return true;
-        }
-
-        visited.push((nx, ny, new_dir_index));
-        let nx2 = match nx.checked_add_signed(new_dir.0) {
+        let nx2 = match nx.checked_add_signed(dirs[new_dir_index].0) {
             Some(v) => v,
             None => {
                 return false;
             }
         };
-        let ny2 = match ny.checked_add_signed(new_dir.1) {
+        let ny2 = match ny.checked_add_signed(dirs[new_dir_index].1) {
             Some(v) => v,
             None => {
                 return false;
@@ -270,17 +260,32 @@ fn place_wall_creates_loop(
         if ny2 >= lines.len() || nx2 >= lines[ny].len() {
             return false;
         }
-        if lines[ny2][nx2] == '#' {
+
+        if lines[ny2][nx2] == '#' || lines[ny2][nx2] == '0' {
+            if visited.contains(&(nx, ny, new_dir_index)) {
+                visited.push((cx, cy, 0));
+                if cx == 105 && cy == 4 {
+                    println!("cx {:?} cy {:?}:", cx, cy);
+                    let temp = lines[cy][cx];
+                    let temp2 = lines[ny][nx];
+                    lines[cy][cx] = 'S';
+                    // lines[ny][nx] = 'E';
+                    pretty_print(lines, visited.iter().map(|f| (f.0, f.1)).collect());
+                    lines[cy][cx] = temp;
+                    // lines[ny][nx] = temp2;
+                }
+                return true;
+            }
+            visited.push((nx, ny, new_dir_index));
             new_dir_index += 1;
             new_dir_index %= dirs.len();
             continue;
         }
+        if cx == 105 && cy == 4 {
+            visited.push((nx, ny, new_dir_index));
+        }
         nx = nx2;
         ny = ny2;
-
-        if lines[ny][nx] == search_for {
-            return true;
-        }
     }
 }
 
@@ -335,6 +340,3 @@ mod test {
         assert_eq!(p2(example), 2);
     }
 }
-
-// 705 too low
-// 3574 too high

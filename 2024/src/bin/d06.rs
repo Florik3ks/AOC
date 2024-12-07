@@ -156,81 +156,6 @@ pub fn p2(input: &str) -> i32 {
     }
 
     return r;
-    // ----------------------------------
-
-    let mut result = lines.clone();
-    let mut dir_index = 0;
-
-    loop {
-        let (cx, cy) = guardpos;
-        let nx: usize = match cx.checked_add_signed(dirs[dir_index].0) {
-            Some(v) => v,
-            None => {
-                break;
-            }
-        };
-        let ny: usize = match cy.checked_add_signed(dirs[dir_index].1) {
-            Some(v) => v,
-            None => {
-                break;
-            }
-        };
-        if ny >= lines.len() || nx >= lines[ny].len() {
-            break;
-        }
-
-        if lines[ny][nx] == '#' {
-            dir_index += 1;
-            dir_index %= dirs.len();
-            continue;
-        }
-
-        if result[ny][nx] != '0' {
-            // search if the loop is possible
-            let temp = lines[ny][nx];
-            lines[ny][nx] = '0';
-            if place_wall_creates_loop(&mut lines, (cx, cy), dirs, dir_index) {
-                result[ny][nx] = '0';
-                if why.contains(&(nx, ny)) {
-                    println!("aaaa {:?} {:?}", cx, cy)
-                }
-            }
-            lines[ny][nx] = temp;
-        }
-
-        guardpos = (nx, ny);
-
-        // if result[ny][nx] != '0' {
-        lines[ny][nx] = match dir_index {
-            0 => '|',
-            1 => '-',
-            2 => '|',
-            3 => '-',
-            _ => 'E', //rror
-        };
-        // }
-    }
-
-    pretty_print(&lines, vec![]);
-    return result
-        .iter()
-        .map(|f| f.iter().filter(|x| **x == '0').count())
-        .sum::<usize>() as i32;
-}
-
-fn pretty_print(lines: &Vec<Vec<char>>, pretty: Vec<(usize, usize)>) {
-    use colored::Colorize; // debug purposes
-    println!("{}", "-----------".purple());
-    for y in 0..lines.len() {
-        for x in 0..lines[y].len() {
-            if pretty.contains(&(x, y)) {
-                print!("{}", lines[y][x].to_string().red())
-            } else {
-                print!("{}", lines[y][x].to_string().white());
-            }
-        }
-        println!()
-    }
 }
 
 fn place_wall_creates_loop(
@@ -239,7 +164,6 @@ fn place_wall_creates_loop(
     dirs: [(isize, isize); 4],
     dir_index: usize,
 ) -> bool {
-    // println!("try place wall {:?}", dir_index);
     let mut new_dir_index = dir_index;
     let mut nx = cx;
     let mut ny = cy;
@@ -263,26 +187,12 @@ fn place_wall_creates_loop(
 
         if lines[ny2][nx2] == '#' || lines[ny2][nx2] == '0' {
             if visited.contains(&(nx, ny, new_dir_index)) {
-                visited.push((cx, cy, 0));
-                if cx == 105 && cy == 4 {
-                    println!("cx {:?} cy {:?}:", cx, cy);
-                    let temp = lines[cy][cx];
-                    let temp2 = lines[ny][nx];
-                    lines[cy][cx] = 'S';
-                    // lines[ny][nx] = 'E';
-                    pretty_print(lines, visited.iter().map(|f| (f.0, f.1)).collect());
-                    lines[cy][cx] = temp;
-                    // lines[ny][nx] = temp2;
-                }
                 return true;
             }
             visited.push((nx, ny, new_dir_index));
             new_dir_index += 1;
             new_dir_index %= dirs.len();
             continue;
-        }
-        if cx == 105 && cy == 4 {
-            visited.push((nx, ny, new_dir_index));
         }
         nx = nx2;
         ny = ny2;
